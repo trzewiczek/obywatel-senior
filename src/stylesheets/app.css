@@ -1,0 +1,50 @@
+/* Artfully masterminded by ZURB  */
+
+/* -------------------------------------------------- 
+   Table of Contents
+-----------------------------------------------------
+:: Shared Styles
+:: Page Name 1
+:: Page Name 2
+*/
+
+
+/* -----------------------------------------
+   Shared Styles
+----------------------------------------- */
+body, h1, h2, h3, h4, h5, h6 {
+  font-family: 'Ubuntu', sans-serif;
+}
+
+.panel.yellow { 
+  background: #666; 
+  color: #fff; 
+  border-color: #444; -webkit-box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.5); -moz-box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.5); box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.5); }
+
+.button.yellow { color: #666; background-color: #e3c78c; border: 1px solid #c18c1a; }
+.button.yellow:hover, .button.success:focus { background-color: #f4bf4e; }
+
+.optional {
+  border: 1px solid #ddd;
+}
+
+.center {
+  text-align: center;
+  margin: 0px;
+}
+
+.r-border {
+  border-right: 1px solid #666;
+}
+/* -----------------------------------------
+   Page Name 1
+----------------------------------------- */
+
+
+
+
+/* -----------------------------------------
+   Page Name 2
+----------------------------------------- */
+
+

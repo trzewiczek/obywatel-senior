@@ -13,8 +13,7 @@
    Shared Styles
 ----------------------------------------- */
 body {
-  background: url(../images/rough_diagonal.png) repeat;
-  /* margin-top: -23px; */
+  background: url(../images/background.png) repeat;
 }
 
 body, h1, h2, h3, h4, h5, h6 {

@@ -13,7 +13,7 @@
    Shared Styles
 ----------------------------------------- */
 body {
-  background: url(../images/background.png) repeat;
+  background: url(/static/images/background.png) repeat;
 }
 
 body, h1, h2, h3, h4, h5, h6 {
@@ -48,6 +48,10 @@ hr {
 
 .r-border {
   border-right: 1px solid #666;
+}
+
+a.cke_button, a.cke_dialog_tab {
+  height: 100% !important;
 }
 /* -----------------------------------------
    Page Name 1

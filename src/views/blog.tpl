@@ -1,6 +1,6 @@
   <div class="row">
     <div class="twelve columns">
-        <a href="blog_edit.html" class="large radius success button">Dodaj nowy wpis</a>
+        <a href="/blog/new" class="large radius success button">Dodaj nowy wpis</a>
     </div>
   </div>
 
@@ -8,4 +8,45 @@
     <hr />
   </div>
 
+  <div class="row">
+    <div class="twelve columns">
+        <h5>
+        % if posts:
+        Poniżej znajduje się lista wpisów na blogu
+        % else:
+        Nie ma jeszcze żadnych wpisów. Do roboty!
+        % end
+        </h5>
+    </div>
+  </div>
+
+  %for post in posts:
+    <div class="row">
+        <div class="twelve columns radius panel">
+
+            <div class="nine columns r-border">
+                <div class="row">
+                    <div class="twelve columns">
+                        <h5>{{!post['date']}}, {{post['author']}}</h5>
+                        <h3>{{!post['title']}}</h3>
+                        <p>{{!post['text']}}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="three columns">
+                <div class="row">
+                    <div class="eight columns">
+                        <a href="/blog/{{post['id']}}" class="large  radius button right">Edytuj</a>
+                    </div>
+                    <div class="four columns">
+                        <a href="#" data-target="/blog/{{post['id']}}/delete" class="right small alert radius button delete">Usuń</a>
+                    </div>
+                </div>
+            </div>
+        
+        </div>
+    </div>
+  %end
+  
 %rebase layout

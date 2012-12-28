@@ -28,6 +28,7 @@
 
   <script src="/static/javascripts/libs/ckeditor/ckeditor.js"></script>
 
+  <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
   <!-- IE Fix for HTML5 Tags -->
   <!--[if lt IE 9]>
     <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -61,9 +62,10 @@
   -->
   
   <!-- Included JS Files (Compressed) -->
-  <script src="/static/javascripts/jquery.js"></script>
-  <script src="/static/javascripts/foundation.min.js"></script>
   
+  <script src="/static/javascripts/foundation.min.js"></script>
+
+  <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
   <!-- Initialize JS Plugins -->
   <script src="/static/javascripts/app.js"></script>
 

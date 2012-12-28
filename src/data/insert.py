@@ -1,17 +1,25 @@
 import yaml
 import sqlite3
 
-data = yaml.load(open('sample_data.yaml', 'r').read())
-
-cols = ['id', 'date', 'author', 'title', 'text']
+schema = {
+    'blog'      : ['id', 'date', 'author', 'title', 'text'],
+    'notepad'   : ['id', 'date', 'author', 'title', 'text'],
+    'calendar'  : ['id', 'status', 'date', 'person', 'title', 'text'],
+    'addresses' : ['id', 'person', 'name', 'address', 'zip', 'city', 'phone', 'email', 'newsletter'],
+    'newsletter': ['id', 'date', 'title', 'text']
+}
 
 con = sqlite3.connect('data.db')
 cur = con.cursor()
 
-for table in data.keys():
-    dd = [tuple([doc[k] for k in cols]) for doc in data[table]]
-    query = 'INSERT INTO %s VALUES(%s)' % (table, ','.join(['?'] * len(data[table][0].keys())))
-    cur.executemany(query, dd)
+sample_data = yaml.load(open('sample_data.yaml', 'r').read())
+
+for table in sample_data.keys():
+    columns = schema[table]
+    data    = [tuple([doc[k] for k in columns]) for doc in sample_data[table]]
+    query   = 'INSERT INTO %s VALUES(%s)' % (table, ','.join(['?'] * len(columns)))
+
+    cur.executemany(query, data)
 
 con.commit()
 

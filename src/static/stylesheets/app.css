@@ -30,15 +30,22 @@ hr {
 }
 
 .panel.yellow { 
-  background: #666; 
-  color: #fff; 
-  border-color: #444; -webkit-box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.5); -moz-box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.5); box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.5); }
+  background: #fff; 
+  border: 2px solid #888;
+  color: #666; 
+  padding: 14px 0px;
+  height: 55px;
+  width: 149px;
+}
+.panel.yellow.no-border {
+  border: 2px solid #fff;
+}
 
 .button.yellow { color: #666; background-color: #e3c78c; border: 1px solid #c18c1a; }
 .button.yellow:hover, .button.success:focus { background-color: #f4bf4e; }
 
 .optional {
-  border: 1px solid #ddd;
+  border: 2px solid #aaa !important;
 }
 
 .center {
@@ -52,6 +59,18 @@ hr {
 
 a.cke_button, a.cke_dialog_tab {
   height: 100% !important;
+}
+
+.light {
+  color: #888;
+}
+
+.address > div {
+  margin-bottom: 10px;
+}
+
+.finger:hover {
+  cursor: pointer;
 }
 /* -----------------------------------------
    Page Name 1

@@ -354,6 +354,34 @@ def newsletter_resend(letter_id):
     redirect('/newsletter')
 
 
+@route('/deletealldata')
+def delete_all_data():
+    return template('deletealldata')
+
+
+@route('/reallydeletealldata', method='POST')
+def really_delete_all_data():
+    if request.POST.get('password', '') == 'kozak':
+        queries = [
+            "DELETE FROM blog",
+            "DELETE FROM notepad",
+            "DELETE FROM calendar",
+            "DELETE FROM addresses",
+            "DELETE FROM newsletter"
+        ]
+
+        import sqlite3
+
+        con = sqlite3.connect('data/data.db')
+        cur = con.cursor()
+
+        for query in queries:
+            cur.execute(query)
+
+        con.commit()
+
+    redirect('/')
+
 # -- routes for S T A T I C   F I L E S
 @route('/upload', method='POST')
 def upload():

@@ -22,7 +22,11 @@
 
   %for note in todo:
     <div class="row">
+        %if note['overdue']:
+        <div class="twelve columns radius panel overdue">
+        %else:
         <div class="twelve columns radius panel">
+        %end
 
             <div class="nine columns r-border">
                 <div class="row">

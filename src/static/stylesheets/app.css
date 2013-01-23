@@ -72,6 +72,10 @@ a.cke_button, a.cke_dialog_tab {
 .finger:hover {
   cursor: pointer;
 }
+
+.overdue {
+  background: #ffd5d5;
+}
 /* -----------------------------------------
    Page Name 1
 ----------------------------------------- */

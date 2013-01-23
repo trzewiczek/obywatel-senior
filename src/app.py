@@ -4,7 +4,8 @@
 Main access point to the kuklok prototype
 '''
 
-from bottle import request, redirect, route, run, template, static_file
+from bottle import request, redirect, route, run, template, static_file, default_app
+DEBUG = True
 
 
 # -- routes for  B L O G
@@ -422,9 +423,14 @@ def get_blog_posts(post_id=None):
         return posts
 
 def format_time(record):
-    import time
-    tt = time.strptime(record['date'], '%Y.%m.%d %H.%M.%S')
-    record['date'] = time.strftime('%d.%m.%Y', tt)
+    #    import time
+    #    tt = time.strptime(record['date'], '%Y.%m.%d %H.%M.%S')
+    #    record['date'] = time.strftime('%d.%m.%Y', tt)
+
+    import datetime as dt
+    dd = dt.datetime.strptime(record['date'], '%Y.%m.%d %H.%M.%S')
+    record['date'] = dd.strftime('%d.%m.%Y')
+    record['overdue'] = dt.datetime.now() >= dd
 
     return record
 
@@ -459,7 +465,7 @@ def get_todos():
     con.row_factory = sqlite3.Row
 
     cur = con.cursor()
-    cur.execute("SELECT * FROM calendar WHERE status='todo' ORDER BY date DESC")
+    cur.execute("SELECT * FROM calendar WHERE status='todo' ORDER BY date")
 
     todos = [format_time(dict(e)) for e in cur.fetchall()]
 
@@ -544,6 +550,9 @@ def send_letter(title, text):
 
 # -- run the app
 if __name__ == '__main__':
-    run(host='localhost', port=8082, reloader=True)
+    if DEBUG:
+        run(host='localhost', port=8082, reloader=True)
+    else:
+        application = default_app()
 
 

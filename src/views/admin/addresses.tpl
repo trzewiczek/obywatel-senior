@@ -1,6 +1,6 @@
   <div class="row">
     <div class="twelve columns">
-        <a href="/adresy/nowy" class="large radius success button">Dodaj nowy adres</a>
+        <a href="/admin/adresy/nowy" class="large radius success button">Dodaj nowy adres</a>
     </div>
   </div>
 
@@ -46,10 +46,10 @@
             <div class="three columns">
                 <div class="row">
                     <div class="eight columns">
-                        <a href="/adresy/{{adrs['id']}}" class="large  radius button right">Edytuj</a>
+                        <a href="/admin/adresy/{{adrs['id']}}" class="large  radius button right">Edytuj</a>
                     </div>
                     <div class="four columns">
-                        <a href="#" data-target="/adresy/{{adrs['id']}}/delete" class="right small alert radius button delete">Usuń</a>
+                        <a href="#" data-target="/admin/adresy/{{adrs['id']}}/delete" class="right small alert radius button delete">Usuń</a>
                     </div>
                 </div>
                 <br />

@@ -7,7 +7,7 @@
 <div class="row">
     <div class="panel twelve columns">
 
-        <form action="/newsletter/send" method="POST">
+        <form action="/admin/newsletter/send" method="POST">
         <div class="row">
             <div class="eight columns">
 
@@ -27,7 +27,7 @@
                         <input type="submit" class="large radius success button" value="Wyślij" />
                     </div>
                     <div class="four columns">
-                        <a href="#" data-target="/newsletter" class="right small alert radius button cancel">Rezygnuj</a>
+                        <a href="#" data-target="/admin/newsletter" class="right small alert radius button cancel">Rezygnuj</a>
                     </div>
                 </div>
             </div>

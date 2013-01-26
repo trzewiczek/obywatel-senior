@@ -2,11 +2,12 @@ import yaml
 import sqlite3
 
 schema = {
-    'blog'      : ['id', 'date', 'author', 'title', 'text'],
-    'notepad'   : ['id', 'date', 'author', 'title', 'text'],
-    'calendar'  : ['id', 'status', 'date', 'person', 'title', 'text'],
-    'addresses' : ['id', 'person', 'name', 'address', 'zip', 'city', 'phone', 'email', 'newsletter'],
-    'newsletter': ['id', 'date', 'title', 'text']
+    'users'     : ['id', 'name', 'pass', 'grp'],
+    'blog'      : ['id', 'grp', 'date', 'author', 'title', 'text'],
+    'notepad'   : ['id', 'grp', 'date', 'author', 'title', 'text'],
+    'calendar'  : ['id', 'grp', 'status', 'date', 'person', 'title', 'text'],
+    'addresses' : ['id', 'grp', 'person', 'name', 'address', 'zip', 'city', 'phone', 'email', 'newsletter'],
+    'newsletter': ['id', 'grp', 'date', 'title', 'text']
 }
 
 con = sqlite3.connect('data.db')

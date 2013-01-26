@@ -1,6 +1,6 @@
   <div class="row">
     <div class="twelve columns">
-        <a href="/newsletter/nowy" class="large radius success button">Wyślij  nowy newsletter</a>
+        <a href="/admin/newsletter/nowy" class="large radius success button">Wyślij  nowy newsletter</a>
     </div>
   </div>
 
@@ -37,7 +37,7 @@
             <div class="three columns">
                 <div class="row">
                     <div class="twelve columns">
-                        <a href="/newsletter/{{letter['id']}}" class="resend large radius button left">Wyślij ponownie</a>
+                        <a href="/admin/newsletter/{{letter['id']}}" class="resend large radius button left">Wyślij ponownie</a>
                     </div>
                 </div>
             </div>

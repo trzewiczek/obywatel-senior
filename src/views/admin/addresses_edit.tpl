@@ -12,7 +12,7 @@
     <div class="panel twelve columns">
 
         %if address:
-        <form action="/adresy/{{address['id']}}" method="POST">
+        <form action="/admin/adresy/{{address['id']}}" method="POST">
         <div class="row">
             <div class="eight columns">
 
@@ -38,7 +38,7 @@
                 <input type="text" name="email" placeholder="Email" class="optional" value="{{address['email']}}" /> 
 
         %else:
-        <form action="/adresy/nowa" method="POST">
+        <form action="/admin/adresy/nowa" method="POST">
         <div class="row">
             <div class="eight columns">
 
@@ -72,7 +72,7 @@
                 <input type="submit" class="large radius success button" value="Zapisz" />
             </div>
             <div class="four columns">
-                <a href="#" data-target="/adresy" class="right small alert radius button cancel">Rezygnuj</a>
+                <a href="#" data-target="/admin/adresy" class="right small alert radius button cancel">Rezygnuj</a>
             </div>
         </div>
         </form>

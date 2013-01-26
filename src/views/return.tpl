@@ -2,7 +2,7 @@
     <div class="panel">
         <ul class="nav-bar">
             <li id="nav-back">
-                <a href="#" data-target="{{target}}" class="cancel">Powrót</a>
+                <a href="#" data-target="/admin{{target}}" class="cancel">Powrót</a>
             </li>
         </ul>
     </div>

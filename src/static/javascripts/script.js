@@ -26,13 +26,14 @@
         var address_id = $(this).attr('data-id');
         var newsletter = !!($(this).attr('checked')) ? 1 : 0;
 
-        $.get('/adresy/newsletter/'+address_id+'/'+newsletter);
+        $.get('/admin/adresy/newsletter/'+address_id+'/'+newsletter);
     });
  
     $('.resend').click(function () {
         alert('Newsletter został wysłany!');
     });
 
+    // ckeditor
     CKEDITOR.replace('editor1', {
         filebrowserImageUploadUrl: '/upload',
         language: 'pl',
@@ -47,6 +48,8 @@
         ]
     });
 
+
+    // datepicker
     $("#datepicker").datepicker({
         firstDay: 1,
         dayNamesMin: [ "Nd", "Pn", "Wt", "Śr", "Cz", "Pt", "So" ],

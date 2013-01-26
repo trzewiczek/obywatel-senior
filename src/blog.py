@@ -2,7 +2,7 @@ from bottle import request, template
 
 
 def main():
-    return template('blog', {'posts': _get_blog_posts()})
+    return template('admin/blog', {'posts': _get_blog_posts()})
 
 def edit(post_id):
     try:
@@ -10,7 +10,7 @@ def edit(post_id):
     except ValueError:
         post = None
 
-    return template('blog_edit', {'post': post})
+    return template('admin/blog_edit', {'post': post})
 
 def save(post_id):
     import sqlite3
@@ -19,19 +19,19 @@ def save(post_id):
     con = sqlite3.connect('data/data.db')
     cur = con.cursor()
 
-    author = request.POST.get('author', '').decode('utf-8')
     title  = request.POST.get('title', '').decode('utf-8')
     text   = request.POST.get('text', '').decode('utf-8')
 
     try:
         post_id = int(post_id)
-        query   = 'UPDATE blog SET author=?, title=?, text=?  WHERE id=?'
-        cur.execute(query, (author, title, text, post_id))
+        query   = 'UPDATE blog SET title=?, text=?  WHERE id=?'
+        cur.execute(query, (title, text, post_id))
 
     except ValueError:
+        s = request.environ.get('beaker.session')
         date  = '%s' % dt.datetime.now().strftime('%Y.%m.%d %H.%M.%S')
-        query = 'INSERT INTO blog VALUES(?,?,?,?,?)'
-        cur.execute(query, (None, date, author, title, text))
+        query = 'INSERT INTO blog VALUES(?,?,?,?,?,?)'
+        cur.execute(query, (None, s['grp'], date, s['user'], title, text))
 
     con.commit()
 
@@ -53,16 +53,15 @@ def _format_time(record):
     return record
 
 def _get_blog_posts(post_id=None):
-    '''
-    Grabs all blog posts from db
-    '''
+    s = request.environ.get('beaker.session')
+
     import sqlite3
 
     con = sqlite3.connect('data/data.db')
     con.row_factory = sqlite3.Row
 
     cur = con.cursor()
-    cur.execute('SELECT * FROM blog ORDER BY date DESC')
+    cur.execute('SELECT * FROM blog WHERE grp=%s ORDER BY date DESC' % s['grp'])
 
     posts = [_format_time(dict(e)) for e in cur.fetchall()]
 

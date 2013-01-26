@@ -8,6 +8,8 @@ from bottle import request, redirect, route, run, template, static_file, default
 from beaker.middleware import SessionMiddleware
 
 import blog
+import todos
+import notepad
 
 DEBUG = True
 
@@ -19,172 +21,158 @@ session_opts = {
 }
 app = SessionMiddleware(default_app(), session_opts)
 
+# TODO make it a real LoginMiddleware
 def login_middleware(fn):
     def wrapper(*args, **kwargs):
         s = request.environ.get('beaker.session')
-        if True: # 'user' in s:
+        if 'user' in s:
             return fn(*args, **kwargs)
         else:
-            redirect('/login')
+            redirect('/admin/login')
 
     return wrapper
 
+@route('/')
+def index():
+    return template('main', get_posts())
+
+@route('/<grp:int>')
+def group_blog(grp):
+    return template('blog', get_posts(grp))
+
+
 # -- routes for  L O G I N
-@route('/login')
+@route('/admin/login')
 def login_page():
-    return "Login page"
+    import sqlite3
+
+    con = sqlite3.connect('data/data.db')
+    cur = con.cursor()
+
+    cur.execute('SELECT name FROM users')
+    users = [e[0] for e in cur.fetchall()]
+
+    return template('login', {'error': False, 'users': users})
+
+@route('/admin/check_login', method='POST')
+def check_login_page():
+    import sqlite3
+
+    con = sqlite3.connect('data/data.db')
+    cur = con.cursor()
+
+    user = request.POST.get('user', '')
+    pswd = request.POST.get('pass', '')
+    
+    cur.execute("SELECT COUNT(*) FROM users WHERE name='%s' AND pass='%s'" % (user, pswd))
+    if cur.fetchone()[0] == 1:
+        cur.execute("SELECT grp FROM users WHERE name='%s'" % user)
+        grp = cur.fetchone()[0]
+
+        s = request.environ.get('beaker.session')
+        s['user'] = user
+        s['grp']  = grp
+
+        redirect('/admin/blog')
+    else:
+        cur.execute('SELECT name FROM users')
+        users = [e[0] for e in cur.fetchall()]
+
+        return template('login', {'error': True, 'users': users})
+
+@route('/admin/logout')
+def logout():
+    s = request.environ.get('beaker.session')
+    try:
+        del s['user']
+        del s['grp']
+    except KeyError:
+        pass
+
+    redirect('/')
 
 # -- routes for  B L O G
-@route('/')
-@login_middleware
+@route('/admin')
 def index():
-    redirect('/blog')
+    redirect('/admin/blog')
 
-@route('/blog')
+
+@route('/admin/blog')
 @login_middleware
 def blog_main():
     return blog.main()
 
-@route('/blog/<post_id>')
+@route('/admin/blog/<post_id>')
 @login_middleware
 def blog_edit(post_id):
     return blog.edit(post_id)
 
-@route('/blog/<post_id>', method='POST')
+@route('/admin/blog/<post_id>', method='POST')
 @login_middleware
 def blog_save(post_id):
     blog.save(post_id)
-    redirect('/blog')
+    redirect('/admin/blog')
 
-@route('/blog/<post_id>/delete')
+@route('/admin/blog/<post_id>/delete')
 @login_middleware
 def blog_delete(post_id):
     blog.delete(post_id)
-    redirect('/blog')
+    redirect('/admin/blog')
 
 
 # -- routes for  N O T E P A D
-@route('/notatki')
-def notepad():
-    '''
-    Main page view
-    '''
-    return template('notepad', {'notes': get_notes()})
+@route('/admin/notatki')
+@login_middleware
+def notepad_main():
+    return notepad.main()
 
-
-@route('/notatki/<note_id>')
+@route('/admin/notatki/<note_id>')
+@login_middleware
 def notepad_edit(note_id):
-    '''
-    note post edit view
-    '''
-    try:
-        note = get_notes(int(note_id))
-    except ValueError:
-        note = None
+    return notepad.edit(note_id)
 
-    return template('notepad_edit', {'note': note})
-
-
-@route('/notatki/<note_id>', method='POST')
+@route('/admin/notatki/<note_id>', method='POST')
+@login_middleware
 def notepad_save(note_id):
-    '''
-    notepad note edit view
-    '''
-    import sqlite3
-    import datetime as dt
-
-    con = sqlite3.connect('data/data.db')
-    cur = con.cursor()
-
-    author = request.POST.get('author', '').decode('utf-8')
-    title  = request.POST.get('title', '').decode('utf-8')
-    text   = request.POST.get('text', '').decode('utf-8')
-
-    try:
-        note_id = int(note_id)
-        query   = 'UPDATE notepad SET author=?, title=?, text=?  WHERE id=?'
-        cur.execute(query, (author, title, text, note_id))
-
-    except ValueError:
-        date  = '%s' % dt.datetime.now().strftime('%Y.%m.%d %H.%M.%S')
-        query = 'INSERT INTO notepad VALUES(?,?,?,?,?)'
-        cur.execute(query, (None, date, author, title, text))
-
-    con.commit()
-
-    redirect('/notatki')
+    notepad.save(note_id)
+    redirect('/admin/notatki')
 
 
-@route('/notatki/<note_id>/delete')
+@route('/admin/notatki/<note_id>/delete')
+@login_middleware
 def notepad_save(note_id):
-    '''
-    Notes delete
-    '''
-    import sqlite3
-
-    con = sqlite3.connect('data/data.db')
-    cur = con.cursor()
-
-    cur.execute('DELETE FROM notepad WHERE id=%d' % int(note_id))
-    con.commit()
-
-    redirect('/notatki')
+    notepad.save(note_id)
+    redirect('/admin/notatki')
 
 
 # -- routes for  C A L E N D A R
-@route('/terminarz')
-def calendar():
-    '''
-    Main page view
-    '''
-    return template('calendar', {'todo': get_todos(), 'done': get_done()})
+@route('/admin/terminarz')
+@login_middleware
+def todos_main():
+    return todos.main()
 
 
-@route('/terminarz/nowe')
-def calendar_new():
-    return template('calendar_new')
+@route('/admin/terminarz/nowe')
+@login_middleware
+def todos_new():
+    return todos.new_task()
 
 
-@route('/terminarz/nowe', method='POST')
-def calendar_add():
-    import sqlite3
-    import datetime as dt
-
-    con = sqlite3.connect('data/data.db')
-    cur = con.cursor()
-
-    person = request.POST.get('person', '').decode('utf-8')
-    title  = request.POST.get('title', '').decode('utf-8')
-    text   = request.POST.get('text', '').decode('utf-8')
-    date   = request.POST.get('date', '').decode('utf-8')
-    date   = dt.datetime.strptime(date, "%d.%m.%Y")
-    date   = date.strftime('%Y.%m.%d %H.%M.%S')
-
-    query = 'INSERT INTO calendar VALUES(?,?,?,?,?,?)'
-    cur.execute(query, (None, u'todo', date, person, title, text))
-
-    con.commit()
-
-    redirect('/terminarz')
+@route('/admin/terminarz/nowe', method='POST')
+@login_middleware
+def todos_add():
+    todos.add()
+    redirect('/admin/terminarz')
 
 
-@route('/terminarz/<todo_id>')
-def calendar_done(todo_id):
-    '''
-    Main page view
-    '''
-    import sqlite3
-
-    con = sqlite3.connect('data/data.db')
-    cur = con.cursor()
-    cur.execute("UPDATE calendar SET status='done' WHERE id=%d" % int(todo_id))
-    con.commit()
-
-    redirect('/terminarz')
+@route('/admin/terminarz/<todo_id>')
+def todos_done(todo_id):
+    todos.done(todo_id)
+    redirect('/admin/terminarz')
 
 
 # -- routes for  A D R E S Y
-@route('/adresy')
+@route('/admin/adresy')
 def addresses():
     '''
     Main page view
@@ -192,7 +180,7 @@ def addresses():
     return template('addresses', {'addresses': get_address()})
 
 
-@route('/adresy/<address_id>')
+@route('/admin/adresy/<address_id>')
 def addresses_edit(address_id):
     '''
     address post edit view
@@ -205,7 +193,7 @@ def addresses_edit(address_id):
     return template('addresses_edit', {'address': address})
 
 
-@route('/adresy/<address_id>', method='POST')
+@route('/admin/adresy/<address_id>', method='POST')
 def addresses_save(address_id):
     '''
     addresses address edit view
@@ -238,9 +226,9 @@ def addresses_save(address_id):
 
     con.commit()
 
-    redirect('/adresy')
+    redirect('/admin/adresy')
 
-@route('/adresy/newsletter/<address_id>/<newsletter>')
+@route('/admin/adresy/newsletter/<address_id>/<newsletter>')
 def addresses_newsletter(address_id, newsletter):
     import sqlite3
 
@@ -258,7 +246,7 @@ def addresses_newsletter(address_id, newsletter):
 
     return ''
 
-@route('/adresy/<address_id>/delete')
+@route('/admin/adresy/<address_id>/delete')
 def addresses_save(address_id):
     '''
     addresss delete
@@ -271,10 +259,10 @@ def addresses_save(address_id):
     cur.execute('DELETE FROM addresses WHERE id=%d' % int(address_id))
     con.commit()
 
-    redirect('/adresy')
+    redirect('/admin/adresy')
 
 # -- routes for  NEWSLETTER
-@route('/newsletter')
+@route('/admin/newsletter')
 def newsletter():
     '''
     Main page view
@@ -282,7 +270,7 @@ def newsletter():
     return template('newsletter', {'letters': get_letters()})
 
 
-@route('/newsletter/nowy')
+@route('/admin/newsletter/nowy')
 def newsletter_new():
     '''
     letter post edit view
@@ -290,7 +278,7 @@ def newsletter_new():
     return template('newsletter_edit')
 
 
-@route('/newsletter/send', method='POST')
+@route('/admin/newsletter/send', method='POST')
 def newsletter_send():
     '''
     newsletter letter edit view
@@ -311,10 +299,10 @@ def newsletter_send():
 
     send_letter(title, text)
 
-    redirect('/newsletter')
+    redirect('/admin/newsletter')
 
 
-@route('/newsletter/<letter_id:int>')
+@route('/admin/newsletter/<letter_id:int>')
 def newsletter_resend(letter_id):
     '''
     letter post edit view
@@ -333,7 +321,7 @@ def newsletter_resend(letter_id):
 
     send_letter(*data)
 
-    redirect('/newsletter')
+    redirect('/admin/newsletter')
 
 
 @route('/deletealldata')
@@ -384,7 +372,7 @@ def serve_files(path):
     '''
     return static_file(path, root='static/')
 
-def get_blog_posts(post_id=None):
+def get_posts(grp=None):
     '''
     Grabs all blog posts from db
     '''
@@ -394,20 +382,21 @@ def get_blog_posts(post_id=None):
     con.row_factory = sqlite3.Row
 
     cur = con.cursor()
-    cur.execute('SELECT * FROM blog ORDER BY date DESC')
 
-    posts = [format_time(dict(e)) for e in cur.fetchall()]
-
-    if post_id:
-        return [post for post in posts if post['id'] == int(post_id)].pop()
+    if grp:
+        cur.execute('SELECT * FROM blog WHERE grp = ? ORDER BY date DESC', (grp,))
+        return {'posts': [format_time(dict(e)) for e in cur.fetchall()]}
     else:
-        return posts
+        cur.execute('SELECT * FROM blog WHERE grp = 1 ORDER BY date DESC')
+        grp_one = [format_time(dict(e)) for e in cur.fetchall()]
+
+        cur.execute('SELECT * FROM blog WHERE grp = 2 ORDER BY date DESC')
+        grp_two = [format_time(dict(e)) for e in cur.fetchall()]
+
+        return {'grp_one': grp_one, 'grp_two': grp_two}
+
 
 def format_time(record):
-    #    import time
-    #    tt = time.strptime(record['date'], '%Y.%m.%d %H.%M.%S')
-    #    record['date'] = time.strftime('%d.%m.%Y', tt)
-
     import datetime as dt
     dd = dt.datetime.strptime(record['date'], '%Y.%m.%d %H.%M.%S')
     record['date'] = dd.strftime('%d.%m.%Y')
@@ -416,57 +405,7 @@ def format_time(record):
     return record
 
 
-def get_notes(note_id=None):
-    '''
-    Grabs all notes notes from db
-    '''
-    import sqlite3
 
-    con = sqlite3.connect('data/data.db')
-    con.row_factory = sqlite3.Row
-
-    cur = con.cursor()
-    cur.execute('SELECT * FROM notepad ORDER BY date DESC')
-
-    notes = [format_time(dict(e)) for e in cur.fetchall()]
-
-    if note_id:
-        return [note for note in notes if note['id'] == int(note_id)].pop()
-    else:
-        return notes
-
-
-def get_todos():
-    '''
-    Grabs all todos from db
-    '''
-    import sqlite3
-
-    con = sqlite3.connect('data/data.db')
-    con.row_factory = sqlite3.Row
-
-    cur = con.cursor()
-    cur.execute("SELECT * FROM calendar WHERE status='todo' ORDER BY date")
-
-    todos = [format_time(dict(e)) for e in cur.fetchall()]
-
-    return todos
-
-def get_done():
-    '''
-    Grabs all done from db
-    '''
-    import sqlite3
-
-    con = sqlite3.connect('data/data.db')
-    con.row_factory = sqlite3.Row
-
-    cur = con.cursor()
-    cur.execute("SELECT * FROM calendar WHERE status='done' ORDER BY date DESC")
-
-    todos = [format_time(dict(e)) for e in cur.fetchall()]
-
-    return todos
 
 
 def get_address(address_id=None):

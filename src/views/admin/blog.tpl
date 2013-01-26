@@ -1,6 +1,6 @@
   <div class="row">
     <div class="twelve columns">
-        <a href="/notatki/nowa" class="large radius success button">Dodaj nową notatkę</a>
+        <a href="/admin/blog/new" class="large radius success button">Dodaj nowy wpis</a>
     </div>
   </div>
 
@@ -11,25 +11,25 @@
   <div class="row">
     <div class="twelve columns">
         <h5>
-        % if notes:
-        Poniżej znajduje się lista notatek
+        % if posts:
+        Poniżej znajduje się lista wpisów na blogu
         % else:
-        Nie ma jeszcze żadnych notatek. Do roboty!
+        Nie ma jeszcze żadnych wpisów. Do roboty!
         % end
         </h5>
     </div>
   </div>
 
-  %for note in notes:
+  %for post in posts:
     <div class="row">
         <div class="twelve columns radius panel">
 
             <div class="nine columns r-border">
                 <div class="row">
                     <div class="twelve columns">
-                        <h5>{{!note['date']}}, {{note['author']}}</h5>
-                        <h3>{{!note['title']}}</h3>
-                        <p>{{!note['text']}}</p>
+                        <h5>{{!post['date']}}, {{post['author']}}</h5>
+                        <h3>{{!post['title']}}</h3>
+                        <p>{{!post['text']}}</p>
                     </div>
                 </div>
             </div>
@@ -37,10 +37,10 @@
             <div class="three columns">
                 <div class="row">
                     <div class="eight columns">
-                        <a href="/notatki/{{note['id']}}" class="large  radius button right">Edytuj</a>
+                        <a href="/admin/blog/{{post['id']}}" class="large  radius button right">Edytuj</a>
                     </div>
                     <div class="four columns">
-                        <a href="#" data-target="/notatki/{{note['id']}}/delete" class="right small alert radius button delete">Usuń</a>
+                        <a href="#" data-target="/admin/blog/{{post['id']}}/delete" class="right small alert radius button delete">Usuń</a>
                     </div>
                 </div>
             </div>

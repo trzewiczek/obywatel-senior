@@ -8,15 +8,13 @@
     <div class="panel twelve columns">
 
         %if note:
-        <form action="/notatki/{{note['id']}}" method="POST">
+        <form action="/admin/notatki/{{note['id']}}" method="POST">
         <div class="row">
             <div class="eight columns">
 
                 <h5>Tytuł notatki</h5>
                 <input type="text" name="title" placeholder="Tytuł" value="{{note['title']}}" /> 
 
-                <h5>Autor notatki</h5>
-                <input type="text" name="author" placeholder="Autor" value="{{note['author']}}" /> 
             </div>
         </div>
         <div class="row">
@@ -24,15 +22,13 @@
                 <h5>Treść notatki</h5>
                 <textarea id="editor1" rows="20" name="text" placeholder="Treść notatki">{{note['text']}}</textarea>
         %else:
-        <form action="/notatki/nowa" method="POST">
+        <form action="/admin/notatki/nowa" method="POST">
         <div class="row">
             <div class="eight columns">
 
                 <h5>Tytuł notatki</h5>
                 <input type="text" name="title" placeholder="Tytuł" value="" /> 
 
-                <h5>Autor notatki</h5>
-                <input type="text" name="author" placeholder="Autor" value="" /> 
             </div>
         </div>
         <div class="row">
@@ -47,7 +43,7 @@
                         <input type="submit" class="large radius success button" value="Zapisz" />
                     </div>
                     <div class="four columns">
-                        <a href="#" data-target="/notatki" class="right small alert radius button cancel">Rezygnuj</a>
+                        <a href="#" data-target="/admin/notatki" class="right small alert radius button cancel">Rezygnuj</a>
                     </div>
                 </div>
             </div>

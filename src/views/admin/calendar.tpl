@@ -1,6 +1,6 @@
   <div class="row">
     <div class="twelve columns">
-        <a href="/terminarz/nowe" class="large radius success button">Dodaj nowe zadanie</a>
+        <a href="/admin/terminarz/nowe" class="large radius success button">Dodaj nowe zadanie</a>
     </div>
   </div>
 
@@ -41,7 +41,7 @@
             <div class="three columns">
                 <div class="row">
                     <div class="twelve columns">
-                        <a href="/terminarz/{{note['id']}}" class="large radius button left">Zrobione?</a>
+                        <a href="/admin/terminarz/{{note['id']}}" class="large radius button left">Zrobione?</a>
                     </div>
                 </div>
             </div>

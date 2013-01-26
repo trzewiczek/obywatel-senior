@@ -76,6 +76,12 @@ a.cke_button, a.cke_dialog_tab {
 .overdue {
   background: #ffd5d5;
 }
+
+select, option {
+  font-size: 18px;
+  padding-top: 5px;
+  padding-left: 5px;
+}
 /* -----------------------------------------
    Page Name 1
 ----------------------------------------- */

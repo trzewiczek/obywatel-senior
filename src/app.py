@@ -5,80 +5,61 @@ Main access point to the kuklok prototype
 '''
 
 from bottle import request, redirect, route, run, template, static_file, default_app
+from beaker.middleware import SessionMiddleware
+
+import blog
+
 DEBUG = True
 
+session_opts = {
+    'session.type': 'file',
+    'session.cookie_expires': 300,
+    'session.data_dir': './session_data',
+    'session.auto': True
+}
+app = SessionMiddleware(default_app(), session_opts)
+
+def login_middleware(fn):
+    def wrapper(*args, **kwargs):
+        s = request.environ.get('beaker.session')
+        if True: # 'user' in s:
+            return fn(*args, **kwargs)
+        else:
+            redirect('/login')
+
+    return wrapper
+
+# -- routes for  L O G I N
+@route('/login')
+def login_page():
+    return "Login page"
 
 # -- routes for  B L O G
 @route('/')
+@login_middleware
 def index():
-    '''
-    Main page view
-    '''
     redirect('/blog')
 
 @route('/blog')
-def blog():
-    '''
-    Main page view
-    '''
-    return template('blog', {'posts': get_blog_posts()})
-
+@login_middleware
+def blog_main():
+    return blog.main()
 
 @route('/blog/<post_id>')
+@login_middleware
 def blog_edit(post_id):
-    '''
-    Blog post edit view
-    '''
-    try:
-        post = get_blog_posts(int(post_id))
-    except ValueError:
-        post = None
-
-    return template('blog_edit', {'post': post})
-
+    return blog.edit(post_id)
 
 @route('/blog/<post_id>', method='POST')
+@login_middleware
 def blog_save(post_id):
-    '''
-    Blog post edit view
-    '''
-    import sqlite3
-    import datetime as dt
-
-    con = sqlite3.connect('data/data.db')
-    cur = con.cursor()
-
-    author = request.POST.get('author', '').decode('utf-8')
-    title  = request.POST.get('title', '').decode('utf-8')
-    text   = request.POST.get('text', '').decode('utf-8')
-
-    try:
-        post_id = int(post_id)
-        query   = 'UPDATE blog SET author=?, title=?, text=?  WHERE id=?'
-        cur.execute(query, (author, title, text, post_id))
-
-    except ValueError:
-        date  = '%s' % dt.datetime.now().strftime('%Y.%m.%d %H.%M.%S')
-        query = 'INSERT INTO blog VALUES(?,?,?,?,?)'
-        cur.execute(query, (None, date, author, title, text))
-
-    con.commit()
-
+    blog.save(post_id)
     redirect('/blog')
 
 @route('/blog/<post_id>/delete')
-def blog_save(post_id):
-    '''
-    Blog post edit view
-    '''
-    import sqlite3
-
-    con = sqlite3.connect('data/data.db')
-    cur = con.cursor()
-
-    cur.execute('DELETE FROM blog WHERE id=%d' % int(post_id))
-    con.commit()
-
+@login_middleware
+def blog_delete(post_id):
+    blog.delete(post_id)
     redirect('/blog')
 
 
@@ -430,7 +411,7 @@ def format_time(record):
     import datetime as dt
     dd = dt.datetime.strptime(record['date'], '%Y.%m.%d %H.%M.%S')
     record['date'] = dd.strftime('%d.%m.%Y')
-    record['overdue'] = dt.datetime.now() >= dd
+    record['overdue'] = dt.datetime.now() > dd
 
     return record
 
@@ -551,8 +532,8 @@ def send_letter(title, text):
 # -- run the app
 if __name__ == '__main__':
     if DEBUG:
-        run(host='localhost', port=8082, reloader=True)
+        run(app=app, host='localhost', port=8082, reloader=True)
     else:
-        application = default_app()
+        application = app
 
 

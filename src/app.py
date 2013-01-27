@@ -11,22 +11,37 @@ import addresses
 import blog
 import todos
 import notepad
+import newsletter
 
 DEBUG = True
 
 session_opts = {
     'session.type': 'file',
-    'session.cookie_expires': 300,
+    'session.cookie_expires': 3600,
     'session.data_dir': './session_data',
     'session.auto': True
 }
 app = SessionMiddleware(default_app(), session_opts)
+
+def log_statistics():
+    import datetime as dt
+    import sqlite3
+
+    con = sqlite3.connect('data/data.db')
+    cur = con.cursor()
+
+    s = request.environ.get('beaker.session')
+    date, time = ("%s" % dt.datetime.now()).split(' ')
+    
+    cur.execute('INSERT INTO log VALUES(?,?,?,?)', (date, time, s['user'], request.path))
+    con.commit()
 
 # TODO make it a real LoginMiddleware
 def login_middleware(fn):
     def wrapper(*args, **kwargs):
         s = request.environ.get('beaker.session')
         if 'user' in s:
+            log_statistics() 
             return fn(*args, **kwargs)
         else:
             redirect('/admin/login')
@@ -181,153 +196,58 @@ def addresses_main():
 
 
 @route('/admin/adresy/<address_id>')
+@login_middleware
 def addresses_edit(address_id):
-    '''
-    address post edit view
-    '''
-    try:
-        address = get_address(int(address_id))
-    except ValueError:
-        address = None
-
-    return template('addresses_edit', {'address': address})
-
+    return addresses.edit(address_id)
 
 @route('/admin/adresy/<address_id>', method='POST')
+@login_middleware
 def addresses_save(address_id):
-    '''
-    addresses address edit view
-    '''
-    import sqlite3
-
-    con = sqlite3.connect('data/data.db')
-    cur = con.cursor()
-
-    person = request.POST.get('person', '').decode('utf-8')
-    name   = request.POST.get('name', '').decode('utf-8')
-    adrs   = request.POST.get('address', '').decode('utf-8')
-    zipc   = request.POST.get('zip', '').decode('utf-8')
-    city   = request.POST.get('city', '').decode('utf-8')
-    phone  = request.POST.get('phone', '').decode('utf-8')
-    email  = request.POST.get('email', '').decode('utf-8')
-
-    try:
-        address_id = int(address_id)
-        query = '''UPDATE addresses
-                   SET person=?, name=?, address=?, zip=?, city=?, phone=?, email=?
-                   WHERE id=?'''
-        update_data = (person, name, adrs, zipc, city, phone, email, address_id)
-        cur.execute(query, update_data)
-
-    except ValueError:
-        query = 'INSERT INTO addresses VALUES(?,?,?,?,?,?,?,?,?)'
-        insert_data = (None, person, name, adrs, zipc, city, phone, email, 0)
-        cur.execute(query, insert_data)
-
-    con.commit()
-
+    addresses.save(address_id)
     redirect('/admin/adresy')
 
 @route('/admin/adresy/newsletter/<address_id>/<newsletter>')
+@login_middleware
 def addresses_newsletter(address_id, newsletter):
-    import sqlite3
-
-    con = sqlite3.connect('data/data.db')
-    cur = con.cursor()
-
-    address_id = int(address_id)
-    newsletter = int(newsletter)
-
-    query = '''UPDATE addresses
-               SET newsletter=?
-               WHERE id=?'''
-    cur.execute(query, (newsletter, address_id))
-    con.commit()
-
+    addresses.add_newsletter(address_id, newsletter)
     return ''
 
 @route('/admin/adresy/<address_id>/delete')
-def addresses_save(address_id):
-    '''
-    addresss delete
-    '''
-    import sqlite3
-
-    con = sqlite3.connect('data/data.db')
-    cur = con.cursor()
-
-    cur.execute('DELETE FROM addresses WHERE id=%d' % int(address_id))
-    con.commit()
-
+@login_middleware
+def addresses_delete(address_id):
+    addresses.delete(address_id)
     redirect('/admin/adresy')
 
 # -- routes for  NEWSLETTER
 @route('/admin/newsletter')
-def newsletter():
-    '''
-    Main page view
-    '''
-    return template('newsletter', {'letters': get_letters()})
-
+@login_middleware
+def newsletter_main():
+    return newsletter.main()
 
 @route('/admin/newsletter/nowy')
+@login_middleware
 def newsletter_new():
-    '''
-    letter post edit view
-    '''
-    return template('newsletter_edit')
+    return newsletter.new()
 
 
 @route('/admin/newsletter/send', method='POST')
+@login_middleware
 def newsletter_send():
-    '''
-    newsletter letter edit view
-    '''
-    import sqlite3
-    import datetime as dt
-
-    con = sqlite3.connect('data/data.db')
-    cur = con.cursor()
-
-    date  = dt.datetime.now().strftime('%Y.%m.%d %H.%M.%S')
-    title = request.POST.get('title', '').decode('utf-8')
-    text  = request.POST.get('text', '').decode('utf-8')
-
-    query = "INSERT INTO newsletter VALUES(?,?,?,?)"
-    cur.execute(query, (None, date, title, text))
-    con.commit()
-
-    send_letter(title, text)
-
+    newsletter.send()
     redirect('/admin/newsletter')
 
 
 @route('/admin/newsletter/<letter_id:int>')
+@login_middleware
 def newsletter_resend(letter_id):
-    '''
-    letter post edit view
-    '''
-    import sqlite3
-    import datetime as dt
-
-    con = sqlite3.connect('data/data.db')
-    cur = con.cursor()
-
-    letter_id = int(letter_id)
-
-    query   = 'SELECT title, text FROM newsletter WHERE id=?'
-    cur.execute(query, (letter_id,))
-    data = cur.fetchone()
-
-    send_letter(*data)
-
+    newsletter.resend(letter_id)
     redirect('/admin/newsletter')
 
 
+# -- hiper admin routes
 @route('/deletealldata')
 def delete_all_data():
     return template('deletealldata')
-
 
 @route('/reallydeletealldata', method='POST')
 def really_delete_all_data():
@@ -352,6 +272,7 @@ def really_delete_all_data():
 
     redirect('/')
 
+
 # -- routes for S T A T I C   F I L E S
 @route('/upload', method='POST')
 def upload():
@@ -372,10 +293,11 @@ def serve_files(path):
     '''
     return static_file(path, root='static/')
 
+
 def get_posts(grp=None):
     '''
-    Grabs all blog posts from db
-    '''
+Grabs all blog posts from db
+'''
     import sqlite3
 
     con = sqlite3.connect('data/data.db')
@@ -403,68 +325,6 @@ def format_time(record):
     record['overdue'] = dt.datetime.now() > dd
 
     return record
-
-
-
-
-
-def get_address(address_id=None):
-    '''
-    Grabs all notes notes from db
-    '''
-    import sqlite3
-
-    con = sqlite3.connect('data/data.db')
-    con.row_factory = sqlite3.Row
-
-    cur = con.cursor()
-    cur.execute('SELECT * FROM addresses ORDER BY name')
-
-    addresses = [dict(e) for e in cur.fetchall()]
-
-    if address_id:
-        return [address for address in addresses if address['id'] == int(address_id)].pop()
-    else:
-        return addresses
-
-def get_letters():
-    '''
-    Grabs all done from db
-    '''
-    import sqlite3
-
-    con = sqlite3.connect('data/data.db')
-    con.row_factory = sqlite3.Row
-
-    cur = con.cursor()
-    cur.execute("SELECT * FROM newsletter ORDER BY date DESC")
-
-    letters = [format_time(dict(e)) for e in cur.fetchall()]
-
-    return letters
-
-
-def send_letter(title, text):
-    import sqlite3
-    import smtplib
-    from email.mime.text import MIMEText
-    from email.Utils import formataddr
-
-    con = sqlite3.connect('data/data.db')
-    cur = con.cursor()
-    cur.execute("SELECT email FROM addresses WHERE newsletter=1")
-
-    for email in [e[0] for e in cur.fetchall()]:
-        msg = MIMEText(text, 'html', 'utf-8')
-
-        msg['Subject'] = title
-        msg['From'] = 'krzysztof@trzewiczek.info'
-        msg['To'] = email
-
-        print msg.as_string()
-#        s = smtplib.SMTP('localhost')
-#        s.sendmail('krzysztof@trzewiczek.info', email, msg.as_string())
-#        s.quit()
 
 
 

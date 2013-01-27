@@ -1,3 +1,11 @@
+DROP TABLE IF EXISTS log;
+CREATE TABLE log(
+    date        TEXT,
+    time        TEXT,
+    user        TEXT,
+    path        TEXT
+);
+
 DROP TABLE IF EXISTS users;
 CREATE TABLE users(
     id          INTEGER PRIMARY KEY,

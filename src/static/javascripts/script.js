@@ -1,5 +1,5 @@
 ;(function ($) {
-    var path = window.location['pathname'].split('/')[1];
+    var path = window.location['pathname'].split('/')[2];
     $('li.active').removeClass('active');
     $('#nav-'+path).addClass('active');
 

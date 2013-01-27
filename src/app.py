@@ -12,6 +12,8 @@ import blog
 import todos
 import notepad
 import newsletter
+import login
+from login import login_middleware
 
 DEBUG = True
 
@@ -23,31 +25,8 @@ session_opts = {
 }
 app = SessionMiddleware(default_app(), session_opts)
 
-def log_statistics():
-    import datetime as dt
-    import sqlite3
 
-    con = sqlite3.connect('data/data.db')
-    cur = con.cursor()
-
-    s = request.environ.get('beaker.session')
-    date, time = ("%s" % dt.datetime.now()).split(' ')
-    
-    cur.execute('INSERT INTO log VALUES(?,?,?,?)', (date, time, s['user'], request.path))
-    con.commit()
-
-# TODO make it a real LoginMiddleware
-def login_middleware(fn):
-    def wrapper(*args, **kwargs):
-        s = request.environ.get('beaker.session')
-        if 'user' in s:
-            log_statistics() 
-            return fn(*args, **kwargs)
-        else:
-            redirect('/admin/login')
-
-    return wrapper
-
+# -- routes for  P U B L I C  B L O G
 @route('/')
 def index():
     return template('main', get_posts())
@@ -56,56 +35,6 @@ def index():
 def group_blog(grp):
     return template('blog', get_posts(grp))
 
-
-# -- routes for  L O G I N
-@route('/admin/login')
-def login_page():
-    import sqlite3
-
-    con = sqlite3.connect('data/data.db')
-    cur = con.cursor()
-
-    cur.execute('SELECT name FROM users')
-    users = [e[0] for e in cur.fetchall()]
-
-    return template('login', {'error': False, 'users': users})
-
-@route('/admin/check_login', method='POST')
-def check_login_page():
-    import sqlite3
-
-    con = sqlite3.connect('data/data.db')
-    cur = con.cursor()
-
-    user = request.POST.get('user', '')
-    pswd = request.POST.get('pass', '')
-    
-    cur.execute("SELECT COUNT(*) FROM users WHERE name='%s' AND pass='%s'" % (user, pswd))
-    if cur.fetchone()[0] == 1:
-        cur.execute("SELECT grp FROM users WHERE name='%s'" % user)
-        grp = cur.fetchone()[0]
-
-        s = request.environ.get('beaker.session')
-        s['user'] = user
-        s['grp']  = grp
-
-        redirect('/admin/blog')
-    else:
-        cur.execute('SELECT name FROM users')
-        users = [e[0] for e in cur.fetchall()]
-
-        return template('login', {'error': True, 'users': users})
-
-@route('/admin/logout')
-def logout():
-    s = request.environ.get('beaker.session')
-    try:
-        del s['user']
-        del s['grp']
-    except KeyError:
-        pass
-
-    redirect('/')
 
 # -- routes for  B L O G
 @route('/admin')
@@ -152,7 +81,6 @@ def notepad_edit(note_id):
 def notepad_save(note_id):
     notepad.save(note_id)
     redirect('/admin/notatki')
-
 
 @route('/admin/notatki/<note_id>/delete')
 @login_middleware
@@ -327,6 +255,19 @@ def format_time(record):
     return record
 
 
+# -- routes for  L O G I N
+@route('/admin/login')
+def login_page():
+    return login.page()
+
+@route('/admin/check_login', method='POST')
+def check_login_page():
+    return login.check()
+
+@route('/admin/logout')
+def logout():
+    login.logout()
+    redirect('/')
 
 # -- run the app
 if __name__ == '__main__':

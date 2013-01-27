@@ -19,19 +19,20 @@ def save(post_id):
     con = sqlite3.connect('data/data.db')
     cur = con.cursor()
 
-    title  = request.POST.get('title', '').decode('utf-8')
-    text   = request.POST.get('text', '').decode('utf-8')
+    title = request.POST.get('title', '').decode('utf-8')
+    text  = request.POST.get('text', '').decode('utf-8')
+    path  = request.POST.get('path', '').decode('utf-8')
 
     try:
         post_id = int(post_id)
-        query   = 'UPDATE blog SET title=?, text=?  WHERE id=?'
-        cur.execute(query, (title, text, post_id))
+        query   = 'UPDATE blog SET title=?, text=?, path=?  WHERE id=?'
+        cur.execute(query, (title, text, path, post_id))
 
     except ValueError:
         s = request.environ.get('beaker.session')
         date  = '%s' % dt.datetime.now().strftime('%Y.%m.%d %H.%M.%S')
-        query = 'INSERT INTO blog VALUES(?,?,?,?,?,?)'
-        cur.execute(query, (None, s['grp'], date, s['user'], title, text))
+        query = 'INSERT INTO blog VALUES(?,?,?,?,?,?,?)'
+        cur.execute(query, (None, s['grp'], date, s['user'], title, text, path))
 
     con.commit()
 
@@ -41,8 +42,33 @@ def delete(post_id):
     con = sqlite3.connect('data/data.db')
     cur = con.cursor()
 
+#    cur.execute('SELECT path FROM blog WHERE id=%s' % post_id)
+#    path = cur.fetchone()[0]
+#    if path:
+#        import os
+#        os.remove('.'+path)
+
     cur.execute('DELETE FROM blog WHERE id=%d' % int(post_id))
     con.commit()
+
+
+def upload():
+    upload = request.POST.get('upload')
+    path = 'static/images/uploads/%s' % upload.filename
+
+    #TODO check for duplicates
+
+    f = open(path, 'wb')
+    f.write(upload.file.read())
+    f.close()
+
+    import Image
+    img = Image.open(path)
+    img.thumbnail((500, 500), Image.ANTIALIAS)
+    img.save(path)
+
+    return '/%s' % path
+
 
 def _format_time(record):
     import datetime as dt

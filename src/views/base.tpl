@@ -66,6 +66,7 @@
   <script src="/static/javascripts/foundation.min.js"></script>
 
   <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+  <script src="http://malsup.github.com/jquery.form.js"></script>
   <!-- Initialize JS Plugins -->
   <script src="/static/javascripts/app.js"></script>
 

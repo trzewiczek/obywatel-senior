@@ -64,6 +64,9 @@ def blog_delete(post_id):
     blog.delete(post_id)
     redirect('/admin/blog')
 
+@route('/admin/blog/upload', method='POST')
+def blog_upload():
+    return blog.upload()
 
 # -- routes for  N O T E P A D
 @route('/admin/notatki')

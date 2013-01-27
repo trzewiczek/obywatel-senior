@@ -21,7 +21,8 @@ CREATE TABLE blog(
     date        TEXT,
     author      TEXT,
     title       TEXT,
-    text        TEXT
+    text        TEXT,
+    path        TEXT
 );
 
 DROP TABLE IF EXISTS notepad;

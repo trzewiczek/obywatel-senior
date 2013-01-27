@@ -29,6 +29,9 @@
                     <div class="twelve columns">
                         <h5>{{!post['date']}}, {{post['author']}}</h5>
                         <h3>{{!post['title']}}</h3>
+                        %if post['path']:
+                        <img src="{{post['path']}}" />
+                        %end
                         <p>{{!post['text']}}</p>
                     </div>
                 </div>

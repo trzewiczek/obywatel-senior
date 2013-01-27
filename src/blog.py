@@ -53,10 +53,17 @@ def delete(post_id):
 
 
 def upload():
-    upload = request.POST.get('upload')
-    path = 'static/images/uploads/%s' % upload.filename
+    import os
+    import StringIO
 
-    #TODO check for duplicates
+    upload = request.POST.get('upload')
+    fname  = upload.filename
+    imgdir = 'static/images/uploads/'
+
+    while os.path.exists(imgdir + fname):
+        fname = '0'+fname
+
+    path = imgdir + fname
 
     f = open(path, 'wb')
     f.write(upload.file.read())

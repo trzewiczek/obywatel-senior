@@ -54,25 +54,6 @@ def _format_time(record):
 
     return record
 
-def _get_blog_posts(note_id=None):
-    '''
-    Grabs all blog posts from db
-    '''
-    import sqlite3
-
-    con = sqlite3.connect('data/data.db')
-    con.row_factory = sqlite3.Row
-
-    cur = con.cursor()
-    cur.execute('SELECT * FROM blog ORDER BY date DESC')
-
-    posts = [_format_time(dict(e)) for e in cur.fetchall()]
-
-    if note_id:
-        return [post for post in posts if post['id'] == int(note_id)].pop()
-    else:
-        return posts
-
 
 def _get_notes(note_id=None):
     '''
@@ -84,7 +65,9 @@ def _get_notes(note_id=None):
     con.row_factory = sqlite3.Row
 
     cur = con.cursor()
-    cur.execute('SELECT * FROM notepad ORDER BY date DESC')
+
+    s = request.environ.get('beaker.session')
+    cur.execute('SELECT * FROM notepad WHERE grp=%s ORDER BY date DESC' % s['grp'])
 
     notes = [_format_time(dict(e)) for e in cur.fetchall()]
 

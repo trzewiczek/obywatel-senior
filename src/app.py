@@ -7,6 +7,7 @@ Main access point to the kuklok prototype
 from bottle import request, redirect, route, run, template, static_file, default_app
 from beaker.middleware import SessionMiddleware
 
+import addresses
 import blog
 import todos
 import notepad
@@ -140,8 +141,8 @@ def notepad_save(note_id):
 
 @route('/admin/notatki/<note_id>/delete')
 @login_middleware
-def notepad_save(note_id):
-    notepad.save(note_id)
+def notepad_delete(note_id):
+    notepad.delete(note_id)
     redirect('/admin/notatki')
 
 
@@ -166,6 +167,7 @@ def todos_add():
 
 
 @route('/admin/terminarz/<todo_id>')
+@login_middleware
 def todos_done(todo_id):
     todos.done(todo_id)
     redirect('/admin/terminarz')
@@ -173,11 +175,9 @@ def todos_done(todo_id):
 
 # -- routes for  A D R E S Y
 @route('/admin/adresy')
-def addresses():
-    '''
-    Main page view
-    '''
-    return template('addresses', {'addresses': get_address()})
+@login_middleware
+def addresses_main():
+    return addresses.main()
 
 
 @route('/admin/adresy/<address_id>')

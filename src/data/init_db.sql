@@ -43,7 +43,8 @@ CREATE TABLE calendar(
     date        TEXT,
     person      TEXT,
     title       TEXT,
-    text        TEXT
+    text        TEXT,
+    author      TEXT
 );
 
 DROP TABLE IF EXISTS addresses;

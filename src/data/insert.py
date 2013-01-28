@@ -5,7 +5,7 @@ schema = {
     'users'     : ['id', 'name', 'pass', 'grp'],
     'blog'      : ['id', 'grp', 'date', 'author', 'title', 'text', 'path'],
     'notepad'   : ['id', 'grp', 'date', 'author', 'title', 'text'],
-    'calendar'  : ['id', 'grp', 'status', 'date', 'person', 'title', 'text'],
+    'calendar'  : ['id', 'grp', 'status', 'date', 'person', 'title', 'text', 'author'],
     'addresses' : ['id', 'grp', 'person', 'name', 'address', 'zip', 'city', 'phone', 'email', 'newsletter'],
     'newsletter': ['id', 'grp', 'date', 'title', 'text']
 }

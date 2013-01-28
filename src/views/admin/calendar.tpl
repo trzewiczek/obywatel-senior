@@ -31,7 +31,7 @@
             <div class="nine columns r-border">
                 <div class="row">
                     <div class="twelve columns">
-                        <h5>{{!note['date']}}, {{!note['person']}}</h5>
+                        <h5>{{!note['date']}}, {{!note['person']}} <span style="font-weight: normal; color: #444">(dodane przez: {{note['author']}})</span></h5>
                         <h3>{{note['title']}}</h3>
                         <p>{{!note['text']}}</p>
                     </div>
@@ -68,7 +68,7 @@
             <div class="nine columns r-border">
                 <div class="row">
                     <div class="twelve columns">
-                        <h5>{{!note['date']}}, {{!note['person']}}</h5>
+                        <h5>{{!note['date']}}, {{!note['person']}} <span style="font-weight: normal; color: #444">(zrobione przez: {{note['author']}})</span></h5>
                         <h3>{{note['title']}}</h3>
                         <p>{{!note['text']}}</p>
                     </div>

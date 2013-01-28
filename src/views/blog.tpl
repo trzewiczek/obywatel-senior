@@ -1,6 +1,11 @@
+  <br />
+
+<div class="row">
+  <div class="panel radius twelve columns">
+
   <div class="row">
     <div class="twelve columns">
-        Obywatel senior
+        <h3>Obywatel senior</h3>
     </div>
   </div>
 
@@ -14,8 +19,9 @@
       %for post in posts:
         <div class="row">
             <div class="twelve columns">
-                <h5>{{!post['date']}}, {{post['author']}}</h5>
                 <h3>{{!post['title']}}</h3>
+                <h5>{{!post['date']}}, {{post['author']}}</h5>
+                <img src="{{post['path']}}" />
                 <p>{{!post['text']}}</p>
             </div>
         </div>
@@ -24,5 +30,7 @@
     </div>
   </div>
 
+  </div>
+</div>
   
 %rebase base

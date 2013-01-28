@@ -28,7 +28,7 @@ def check():
         grp = cur.fetchone()[0]
 
         s = request.environ.get('beaker.session')
-        s['user'] = user
+        s['user'] = user.decode('utf-8')
         s['grp']  = grp
 
         redirect('/admin/blog')
@@ -70,7 +70,6 @@ def log_statistics():
 
     s = request.environ.get('beaker.session')
     date, time = ("%s" % dt.datetime.now()).split(' ')
-    
     cur.execute('INSERT INTO log VALUES(?,?,?,?)', (date, time, s['user'], request.path))
     con.commit()
 

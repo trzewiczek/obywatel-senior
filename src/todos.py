@@ -23,8 +23,8 @@ def add():
     date   = dt.datetime.strptime(date, "%d.%m.%Y")
     date   = date.strftime('%Y.%m.%d %H.%M.%S')
 
-    query = 'INSERT INTO calendar VALUES(?,?,?,?,?,?,?)'
-    cur.execute(query, (None, s['grp'], u'todo', date, person, title, text))
+    query = 'INSERT INTO calendar VALUES(?,?,?,?,?,?,?,?)'
+    cur.execute(query, (None, s['grp'], u'todo', date, person, title, text, s['user']))
 
     con.commit()
 
@@ -33,7 +33,9 @@ def done(todo_id):
 
     con = sqlite3.connect('data/data.db')
     cur = con.cursor()
-    cur.execute("UPDATE calendar SET status='done' WHERE id=%d" % int(todo_id))
+
+    s = request.environ.get('beaker.session')
+    cur.execute("UPDATE calendar SET status='done', author='%s' WHERE id=%d" % (s['user'], int(todo_id)))
     con.commit()
 
 def _get_todos():
